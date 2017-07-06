@@ -1,0 +1,6 @@
+micropython-os
+micropython-struct
+micropython-logging
+micropython-re-pcre
+micropython-os.path
+micropython-unittest
