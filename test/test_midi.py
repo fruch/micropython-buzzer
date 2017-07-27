@@ -1,7 +1,7 @@
 import os.path
 import unittest
 
-from buzzer import MidiFile
+from midi import MidiFile
 
 #import logging
 #logging.basicConfig(level=logging.DEBUG)
