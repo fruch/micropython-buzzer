@@ -1,4 +1,5 @@
 import sys
+from math import pow
 
 try:
     import time
@@ -22,15 +23,15 @@ except ImportError:
 
 SAMPLING_RATE = 1000
 
-PITCHHZ = {}
-keys_s = ('a', 'a#', 'b', 'c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#')
+names = ("c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b")
 
-for k in range(88):
-    freq = int(27.5 * 2. ** (k / 12.))
-    oct = (k + 9) // 12
-    note = '%s%u' % (keys_s[k % 12], oct)
-    PITCHHZ[note] = freq
+A4 = 440
+C0 = A4 * pow(2, -4.75)
 
+def note_freq(note):
+    n, o = note[:-1], int(note[-1])
+    index = names.index(n)
+    return int(round(pow(2, (float(o * 12 + index) / 12.0)) * C0, 2))
 
 def isplit(iterable, sep=None):
     r = ''
@@ -61,6 +62,7 @@ class BuzzerPlayer(object):
         if platform == "esp8266":
             from machine import PWM, Pin
             self.buzzer_pin = PWM(Pin(pin, Pin.OUT), freq=1000)
+
         elif platform == "pyboard":
             import pyb
             from pyb import Pin, Timer
@@ -94,14 +96,16 @@ class BuzzerPlayer(object):
     def tune(self, freq, duration=0, duty=30):
         if self.platform == "esp8266":
             self.buzzer_pin.freq(int(freq))
-            self.buzzer_pin.duty(50)
+            self.buzzer_pin.duty(duty)
             time.sleep_ms(int(duration * 0.9))
             self.buzzer_pin.duty(0)
             time.sleep_ms(int(duration * 0.1))
+
         elif self.platform == "pyboard":
             self.timer.freq(freq)  # change frequency for change tone
             self.channel.pulse_width_percent(30)
             self.pyb.delay(duration)
+
         if callable(self.callback):
             self.callback(freq)
             
@@ -117,8 +121,8 @@ class BuzzerPlayer(object):
             if note_pitch == "r":
                 self.tune(0, duration, 0)
             else:
-                freq = PITCHHZ[note_pitch]
-                freq *= 2 ** transpose
+                freq = note_freq(note_pitch)
+                if transpose: freq *= 2 ** transpose
                 print("%s " % note_pitch, end="")
                 self.tune(freq, duration, 30)
                 
