@@ -16,11 +16,11 @@ for k in range(88):
     freq = int(27.5 * 2. ** (k / 12.))
     oct = (k + 9) // 12
     note = '%s%d' % (keys_s[k % 12], oct)
-    print(note)
     PITCHHZ[note] = freq
 
 class BuzzerTests(unittest.TestCase):
     sample_file = os.path.join(os.path.dirname(__file__), 'Zlilmehuvan.mid')
+    nokia_file = os.path.join(os.path.dirname(__file__), 'star_wars.nokia')
 
     def test_00(self):
         for k, v  in PITCHHZ.items():
@@ -34,18 +34,22 @@ class BuzzerTests(unittest.TestCase):
 
     def test_03_play_nokia_tone(self):
         buzz = BuzzerPlayer(1,2,4)
-        tempo, song = nokia_songs['pink_panther']
-        buzz.play_nokia_tone(tempo, song, name='pink_panther')
+        song = nokia_songs['pink_panther']
+        buzz.play_nokia_tone(song, name='pink_panther')
 
     def test_03_play_nokia_tone_esp8266(self):
         buzz = BuzzerPlayer(12, platform="esp8266")
-        tempo, song = nokia_songs['pink_panther']
-        buzz.play_nokia_tone(tempo, song, name='pink_panther')
+        song = nokia_songs['pink_panther']
+        buzz.play_nokia_tone(song, name='pink_panther')
 
     def test_03_play_nokia_tone_pyborad(self):
         buzz = BuzzerPlayer(1,2,4,  platform='pyboard')
-        tempo, song = nokia_songs['pink_panther']
-        buzz.play_nokia_tone(tempo, song, name='pink_panther')
+        song = nokia_songs['pink_panther']
+        buzz.play_nokia_tone(song, name='pink_panther')
+
+    def test_03_play_nokie_tone_file(self):
+        buzz = BuzzerPlayer(1,2,4)
+        buzz.play_nokia_tone(buzz.from_file(self.nokia_file), name='star_wars')
 
     def test_04_play_midi(self):
         buzz = BuzzerPlayer()

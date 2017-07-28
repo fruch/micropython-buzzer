@@ -73,11 +73,25 @@ class BuzzerPlayer(object):
                   
         self.callback = callback
 
-    def play_nokia_tone(self, tempo, song, transpose=6, name="unkown"):
+    def from_file(self, filename, chunksize=5):
+        with open(filename, "rb") as f:
+            while True:
+                chunk = f.read(chunksize)
+                if chunk:
+                    for b in chunk:
+                        yield chr(b)
+                else:
+                    break
+    
+    def play_nokia_tone(self, song, tempo=None, transpose=6, name="unkown"):
         
         pattern = "([0-9]*)(.*)([0-9]?)"
         def tune(): 
             for item in isplit(song):
+                if item.startswith('t'):
+                    _, tempo = item.split('=')
+                    yield tempo
+                    continue
                 match = re.match(pattern, item)
                 duration = match.group(1)
                 pitch = match.group(2)
@@ -90,16 +104,19 @@ class BuzzerPlayer(object):
                 dotted = pitch.startswith(".")
                 duration = -int(duration) if dotted else int(duration)
                 yield (pitch + octave, int(duration))
-             
-        self.play_tune(tempo, tune(), transpose=transpose, name=name)
 
-    def tune(self, freq, duration=0, duty=30):
+        t = tune()
+        if not tempo:
+            tempo = next(t)
+        self.play_tune(tempo, t, transpose=transpose, name=name)
+
+    def tone(self, freq, duration=0, duty=30):
         if self.platform == "esp8266":
             self.buzzer_pin.freq(int(freq))
             self.buzzer_pin.duty(duty)
-            time.sleep_ms(int(duration * 0.9))
+            time.sleep_us( int(duration * 0.9 * 1000) )
             self.buzzer_pin.duty(0)
-            time.sleep_ms(int(duration * 0.1))
+            time.sleep_us(int(duration * 0.1 * 1000))
 
         elif self.platform == "pyboard":
             self.timer.freq(freq)  # change frequency for change tone
@@ -119,14 +136,14 @@ class BuzzerPlayer(object):
             duration = int(full_note_in_samples / note_duration)
 
             if note_pitch == "r":
-                self.tune(0, duration, 0)
+                self.tone(0, duration, 0)
             else:
                 freq = note_freq(note_pitch)
                 if transpose: freq *= 2 ** transpose
                 print("%s " % note_pitch, end="")
-                self.tune(freq, duration, 30)
+                self.tone(freq, duration, 30)
                 
-        self.tune(0, 0, 0)
+        self.tone(0, 0, 0)
 
     if MidiFile:
         def play_midi(self, filename, track=1,  transpose=6):
@@ -138,5 +155,5 @@ class BuzzerPlayer(object):
         def play_rtttl(self, input):
             tune = RTTTL(input)    
             for freq, msec in tune.notes():
-                self.tune(freq, msec)
+                self.tone(freq, msec)
 

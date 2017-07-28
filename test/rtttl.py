@@ -123,6 +123,6 @@ class RTTTL:
             freq = NOTE[note_idx] * (1 << (octave - 4))
             msec = (self.msec_per_whole_note / duration) * duration_multiplier
 
-            #print('note ', note, 'duration', duration, 'octave', octave, 'freq', freq, 'msec', msec)
+            # print('note ', note, 'duration', duration, 'octave', octave, 'freq', freq, 'msec', msec)
 
             yield freq, msec
