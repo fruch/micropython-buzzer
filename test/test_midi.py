@@ -6,6 +6,9 @@ from midi import MidiFile
 #import logging
 #logging.basicConfig(level=logging.DEBUG)
 
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
 class TestMidi(unittest.TestCase):
     sample_file = os.path.join(os.path.dirname(__file__), 'Zlilmehuvan.mid')
 
@@ -22,7 +25,9 @@ class TestMidi(unittest.TestCase):
     def test_03_read_track(self):
         m =  MidiFile(self.sample_file)
         notes = m.read_track(1)
-        self.assertSequenceEqual(notes[:4], [('r', 0.4343891402714934), ('c2', 1.11627906976744), ('r', 48.00000000000068), ('f1', 1.499999999999999)])
+        for n, expected in zip(notes[:4], (('r', 0.4343891402714933), ('c2', 1.116279069767441), ('r', 48.00000000000171), ('f1', 1.499999999999998))):
+            self.assertEqual(n[0], expected[0])
+            self.assertTrue(isclose(n[1], n[1]))
 
 if __name__ == "__main__":
     unittest.main()
