@@ -59,7 +59,7 @@ class BuzzerPlayer(object):
             
         self.platform = platform
         
-        if platform == "esp8266":
+        if "esp" in platform:
             from machine import PWM, Pin
             self.buzzer_pin = PWM(Pin(pin, Pin.OUT), freq=1000)
 
