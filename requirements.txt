@@ -1,4 +1,3 @@
-micropython-os
 micropython-struct
 micropython-logging
 micropython-re-pcre
