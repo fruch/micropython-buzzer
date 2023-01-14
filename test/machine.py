@@ -1,11 +1,16 @@
-class PWM():
+class PWM:
+    def __init__(self, *args, **kwargs):
+        pass
+
     def duty(self, i):
         pass
+
     def freq(self, f):
         pass
 
 
-class Pin():
+class Pin:
     OUT = "OUT"
-    def __init__(self, *arg, **kwargs):
+
+    def __init__(self, *args, **kwargs):
         pass

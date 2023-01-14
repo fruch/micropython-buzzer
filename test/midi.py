@@ -1,12 +1,14 @@
 import struct
-import sys
 import logging
 
 logger = logging.getLogger(__name__)
 
+
 class Note(object):
-    "Represents a single MIDI note"
-    
+    """
+    Represents a single MIDI note
+    """
+
     note_names = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
     
     def __init__(self, channel, pitch, velocity, start, duration = 0):
@@ -26,10 +28,14 @@ class Note(object):
     def get_end(self):
         return self.start + self.duration
 
+
 class MidiFile(object):
-    "Represents the notes in a MIDI file"
-    
-    def read_byte(self, file):
+    """
+    Represents the notes in a MIDI file
+    """
+
+    @staticmethod
+    def read_byte(file):
         return struct.unpack('B', file.read(1))[0]
     
     def read_variable_length(self, file, counter):
@@ -45,7 +51,7 @@ class MidiFile(object):
                 if not (c & 0x80):
                     break
         
-        return (num, counter)
+        return num, counter
     
     def __init__(self, file_name):
         self.tempo = 120
@@ -140,7 +146,7 @@ class MidiFile(object):
                             note = Note(channel, param1, param2, abs_time)
                             if nn == track_num:
                                 logger.debug("%s", note)
-                                track.append(str(note).split())
+                                track.append(note)
 
                         elif type == 0x8:
                             for note in reversed(track):
@@ -166,6 +172,7 @@ class MidiFile(object):
             return None
     
         for nn in track:
+            nn = str(nn).split()
             start, stop = float(nn[2]), float(nn[3])
     
             if start != stop:   # note ends because of NOTE OFF event
@@ -191,8 +198,12 @@ class MidiFile(object):
                 last2 = start
 
         return song    
-    
+
+
 def getdur(a, b):
-    "Calculate note length for PySynth"
+    """
+    Calculate note length for PySynth"
+    """
+
     return 4 / (b - a)
 

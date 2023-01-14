@@ -22,33 +22,37 @@ NOTE = [
     0.0,
 ]
 
-class RTTTL:
 
+class RTTTL:
     def __init__(self, tune):
         tune_pieces = tune.split(':')
         if len(tune_pieces) != 3:
             raise ValueError('tune should contain exactly 2 colons')
         self.tune = tune_pieces[2]
         self.tune_idx = 0
+        self.msec_per_whole_note = 0
+        self.default_octave = 0
+        self.default_duration = 0
+        self.bpm = 0
         self.parse_defaults(tune_pieces[1])
 
     def parse_defaults(self, defaults):
         # Example: d=4,o=5,b=140
         val = 0
-        id = ' '
+        _id = ' '
         for char in defaults:
             char = char.lower()
             if char.isdigit():
                 val *= 10
                 val += ord(char) - ord('0')
-                if id == 'o':
+                if _id == 'o':
                     self.default_octave = val
-                elif id == 'd':
+                elif _id == 'd':
                     self.default_duration = val
-                elif id == 'b':
+                elif _id == 'b':
                     self.bpm = val
             elif char.isalpha():
-                id = char
+                _id = char
                 val = 0
         # 240000 = 60 sec/min * 4 beats/whole-note * 1000 msec/sec
         self.msec_per_whole_note = 240000.0 / self.bpm
@@ -87,7 +91,7 @@ class RTTTL:
                 return
 
             note = char.lower()
-            if note >= 'a' and note <= 'g':
+            if 'a' <= note <= 'g':
                 note_idx = ord(note) - ord('a')
             elif note == 'h':
                 note_idx = 1    # H is equivalent to B
@@ -109,7 +113,7 @@ class RTTTL:
                 char = self.next_char()
 
             # Check for octave
-            if char >= '4' and char <= '7':
+            if '4' <= char <= '7':
                 octave = ord(char) - ord('0')
                 char = self.next_char()
             else:
