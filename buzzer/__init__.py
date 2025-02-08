@@ -17,7 +17,7 @@ except ImportError:
     MidiFile = None
 
 try:
-   from rtttl import RTTTL
+   from rtttl import RTTTL  # https://github.com/dhylands/upy-rtttl/blob/master/rtttl.py (NOT https://github.com/GraphicHealer/MicroPython-RTTTL)
 except ImportError:
     RTTTL = None
 
@@ -75,6 +75,7 @@ class BuzzerPlayer(object):
         if platform == PLATFORM_esp:
             from machine import PWM, Pin
             self.min_freq = min_freq or 1_000  # ValueError: frequency must be from 1Hz to 40MHz
+            #self.min_freq = min_freq or 1  # ValueError: frequency must be from 1Hz to 40MHz
             self.buzzer_pin = PWM(Pin(pin, Pin.OUT), freq=self.min_freq, duty=0)
         elif platform == PLATFORM_pyboard:
             import pyb
@@ -126,8 +127,10 @@ class BuzzerPlayer(object):
 
     def tone(self, freq, duration=0, duty=30):
         if self.platform == PLATFORM_esp:
-            self.buzzer_pin.freq(int(freq))
-            self.buzzer_pin.duty(duty)
+            freq = int(freq)
+            if freq > 0:
+                self.buzzer_pin.freq(freq)
+                self.buzzer_pin.duty(duty)
             time.sleep_us( int(duration * 0.9 * 1000) )
             self.buzzer_pin.duty(0)
             time.sleep_us(int(duration * 0.1 * 1000))
